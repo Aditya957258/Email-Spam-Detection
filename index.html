@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Data Visualization Dashboard</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --accent-color: #e74c3c;
+            --dark-color: #2c3e50;
+            --light-color: #ecf0f1;
+            --text-color: #34495e;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: #f5f7fa;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 25px;
+            background: linear-gradient(135deg, var(--primary-color), var(--dark-color));
+            color: white;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .chart-card {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            transition: transform 0.3s ease;
+        }
+
+        .chart-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--light-color);
+        }
+
+        .chart-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--dark-color);
+        }
+
+        .chart-container {
+            height: 350px;
+            width: 100%;
+        }
+
+        .tooltip {
+            position: absolute;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            border-radius: 5px;
+            pointer-events: none;
+            font-size: 14px;
+            z-index: 10;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            background-color: var(--dark-color);
+            color: white;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+        }
+
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+
+        .legend-color {
+            width: 15px;
+            height: 15px;
+            margin-right: 5px;
+            border-radius: 3px;
+        }
+
+        .metric-selector {
+            padding: 5px 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            font-family: 'Open Sans', sans-serif;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .chart-container {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Advanced Data Visualization Dashboard</h1>
+            <p class="subtitle">Interactive visualizations for better data understanding</p>
+        </header>
+        
+        <main class="dashboard">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h2 class="chart-title">Quarterly Performance</h2>
+                    <div class="chart-actions">
+                        <select id="bar-chart-metric" class="metric-selector">
+                            <option value="revenue">Revenue</option>
+                            <option value="growth">Growth</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="bar-chart" class="chart-container"></div>
+                <div class="legend" id="bar-legend"></div>
+            </div>
+            
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h2 class="chart-title">Market Distribution</h2>
+                    <div class="chart-actions">
+                        <select id="pie-chart-view" class="metric-selector">
+                            <option value="percentage">Percentage</option>
+                            <option value="value">Absolute Values</option>
+                        </select>
+                    </div>
+                </div>
+                <canvas id="pie-chart" class="chart-container"></canvas>
+            </div>
+            
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h2 class="chart-title">Customer Analysis</h2>
+                    <div class="chart-actions">
+                        <select id="scatter-plot-dimension" class="metric-selector">
+                            <option value="age">By Age</option>
+                            <option value="income">By Income</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="scatter-plot" class="chart-container"></div>
+                <div class="legend" id="scatter-legend"></div>
+            </div>
+        </main>
+        
+        <footer>
+            <p>Data Visualization Dashboard &copy; 2023 | Interactive Analytics</p>
+        </footer>
+    </div>
+    
+    <div class="tooltip" id="tooltip" style="opacity: 0;"></div>
+    
+    <script>
+        // Enhanced sample data with more dimensions
+        const data = {
+            quarterly: {
+                revenue: [120, 150, 180, 210],
+                growth: [10, 25, 20, 16.67], // in percentages
+                categories: ['Q1', 'Q2', 'Q3', 'Q4'],
+                colors: ['#3498db', '#2ecc71', '#e74c3c', '#f39c12']
+            },
+            market: {
+                labels: ['Technology', 'Healthcare', 'Finance', 'Retail', 'Education'],
+                values: [35, 25, 20, 15, 5],
+                colors: ['#3498db', '#2ecc71', '#e74c3c', '#f39c12', '#9b59b6']
+            },
+            customers: {
+                age: [
+                    {x: 25, y: 120, size: 8, group: 'A'},
+                    {x: 30, y: 150, size: 12, group: 'B'},
+                    {x: 35, y: 180, size: 10, group: 'A'},
+                    {x: 40, y: 210, size: 15, group: 'C'},
+                    {x: 45, y: 160, size: 8, group: 'B'},
+                    {x: 50, y: 190, size: 14, group: 'C'}
+                ],
+                income: [
+                    {x: 40000, y: 120, size: 8, group: 'A'},
+                    {x: 55000, y: 150, size: 12, group: 'B'},
+                    {x: 70000, y: 180, size: 10, group: 'A'},
+                    {x: 85000, y: 210, size: 15, group: 'C'},
+                    {x: 60000, y: 160, size: 8, group: 'B'},
+                    {x: 75000, y: 190, size: 14, group: 'C'}
+                ],
+                groups: {
+                    'A': {color: '#3498db', label: 'Group A'},
+                    'B': {color: '#2ecc71', label: 'Group B'},
+                    'C': {color: '#e74c3c', label: 'Group C'}
+                }
+            }
+        };
+
+        // Create tooltip
+        const tooltip = d3.select("#tooltip");
+
+        // Create bar chart with D3.js
+        function createBarChart(metric = 'revenue') {
+            d3.select("#bar-chart").selectAll("*").remove();
+            
+            const margin = {top: 30, right: 30, bottom: 50, left: 50};
+            const width = document.getElementById('bar-chart').clientWidth - margin.left - margin.right;
+            const height = 350 - margin.top - margin.bottom;
+
+            const svg = d3.select("#bar-chart")
+                .append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", `translate(${margin.left},${margin.top})`);
+
+            const x = d3.scaleBand()
+                .domain(data.quarterly.categories)
+                .range([0, width])
+                .padding(0.2);
+
+            const y = d3.scaleLinear()
+                .domain([0, d3.max(data.quarterly[metric]) * 1.1])
+                .nice()
+                .range([height, 0]);
+
+            // Add X axis
+            svg.append("g")
+                .attr("class", "axis")
+                .attr("transform", `translate(0,${height})`)
+                .call(d3.axisBottom(x))
+                .selectAll("text")
+                .style("text-anchor", "middle");
+
+            // Add Y axis
+            svg.append("g")
+                .attr("class", "axis")
+                .call(d3.axisLeft(y));
+
+            // Add Y axis label
+            svg.append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("y", 0 - margin.left)
+                .attr("x", 0 - (height / 2))
+                .attr("dy", "1em")
+                .style("text-anchor", "middle")
+                .text(metric === 'revenue' ? 'Revenue ($k)' : 'Growth (%)');
+
+            // Add bars
+            svg.selectAll(".bar")
+                .data(data.quarterly[metric])
+                .enter()
+                .append("rect")
+                .attr("class", "bar")
+                .attr("x", (d, i) => x(data.quarterly.categories[i]))
+                .attr("y", d => y(d))
+                .attr("width", x.bandwidth())
+                .attr("height", d => height - y(d))
+                .attr("fill", (d, i) => data.quarterly.colors[i])
+                .on("mouseover", function(event, d) {
+                    d3.select(this).attr("opacity", 0.8);
+                    tooltip.transition()
+                        .duration(200)
+                        .style("opacity", .9);
+                    tooltip.html(`<strong>${data.quarterly.categories[data.quarterly[metric].indexOf(d)]}</strong><br>
+                                 <strong>${metric === 'revenue' ? 'Revenue' : 'Growth'}:</strong> ${d}${metric === 'growth' ? '%' : 'k'}`)
+                        .style("left", (event.pageX + 10) + "px")
+                        .style("top", (event.pageY - 28) + "px");
+                })
+                .on("mouseout", function() {
+                    d3.select(this).attr("opacity", 1);
+                    tooltip.transition()
+                        .duration(500)
+                        .style("opacity", 0);
+                });
+
+            // Update legend
+            const legend = d3.select("#bar-legend").html("");
+            data.quarterly.categories.forEach((category, i) => {
+                legend.append("div")
+                    .attr("class", "legend-item")
+                    .html(`<div class="legend-color" style="background-color:${data.quarterly.colors[i]}"></div>${category}`);
+            });
+        }
+
+        // Create scatter plot with D3.js
+        function createScatterPlot(dimension = 'age') {
+            d3.select("#scatter-plot").selectAll("*").remove();
+            
+            const margin = {top: 30, right: 30, bottom: 50, left: 50};
+            const width = document.getElementById('scatter-plot').clientWidth - margin.left - margin.right;
+            const height = 350 - margin.top - margin.bottom;
+
+            const svg = d3.select("#scatter-plot")
+                .append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", `translate(${margin.left},${margin.top})`);
+
+            const x = d3.scaleLinear()
+                .domain([d3.min(data.customers[dimension], d => d.x) * 0.9, d3.max(data.customers[dimension], d => d.x) * 1.1])
+                .range([0, width]);
+
+            const y = d3.scaleLinear()
+                .domain([d3.min(data.customers[dimension], d => d.y) * 0.9, d3.max(data.customers[dimension], d => d.y) * 1.1])
+                .range([height, 0]);
+
+            // Add X axis
+            svg.append("g")
+                .attr("class", "axis")
+                .attr("transform", `translate(0,${height})`)
+                .call(d3.axisBottom(x));
+
+            // Add X axis label
+            svg.append("text")
+                .attr("transform", `translate(${width / 2}, ${height + margin.bottom - 10})`)
+                .style("text-anchor", "middle")
+                .text(dimension === 'age' ? 'Age' : 'Income ($)');
+
+            // Add Y axis
+            svg.append("g")
+                .attr("class", "axis")
+                .call(d3.axisLeft(y));
+
+            // Add Y axis label
+            svg.append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("y", 0 - margin.left)
+                .attr("x", 0 - (height / 2))
+                .attr("dy", "1em")
+                .style("text-anchor", "middle")
+                .text("Spending ($)");
+
+            // Add dots
+            svg.selectAll("dot")
+                .data(data.customers[dimension])
+                .enter()
+                .append("circle")
+                .attr("cx", d => x(d.x))
+                .attr("cy", d => y(d.y))
+                .attr("r", d => d.size)
+                .attr("fill", d => data.customers.groups[d.group].color)
+                .attr("opacity", 0.8)
+                .on("mouseover", function(event, d) {
+                    d3.select(this).attr("stroke", "#000").attr("stroke-width", 2);
+                    tooltip.transition()
+                        .duration(200)
+                        .style("opacity", .9);
+                    tooltip.html(`<strong>${dimension === 'age' ? 'Age' : 'Income'}:</strong> ${d.x}${dimension === 'income' ? 'k' : ''}<br>
+                                 <strong>Spending:</strong> $${d.y}<br>
+                                 <strong>Group:</strong> ${data.customers.groups[d.group].label}`)
+                        .style("left", (event.pageX + 10) + "px")
+                        .style("top", (event.pageY - 28) + "px");
+                })
+                .on("mouseout", function() {
+                    d3.select(this).attr("stroke", "none");
+                    tooltip.transition()
+                        .duration(500)
+                        .style("opacity", 0);
+                });
+
+            // Add trend line
+            const line = d3.line()
+                .x(d => x(d.x))
+                .y(d => y(d.y + 20)); // Offset for visibility
+
+            svg.append("path")
+                .datum(data.customers[dimension])
+                .attr("fill", "none")
+                .attr("stroke", "#7f8c8d")
+                .attr("stroke-width", 1.5)
+                .attr("stroke-dasharray", "5,5")
+                .attr("d", line);
+
+            // Update legend
+            const legend = d3.select("#scatter-legend").html("");
+            Object.values(data.customers.groups).forEach(group => {
+                legend.append("div")
+                    .attr("class", "legend-item")
+                    .html(`<div class="legend-color" style="background-color:${group.color}"></div>${group.label}`);
+            });
+        }
+
+        // Create pie chart with Chart.js
+        let pieChart;
+        function createPieChart(view = 'percentage') {
+            const ctx = document.getElementById('pie-chart').getContext('2d');
+            
+            if (pieChart) {
+                pieChart.destroy();
+            }
+
+            pieChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: data.market.labels,
+                    datasets: [{
+                        data: data.market.values,
+                        backgroundColor: data.market.colors,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '60%',
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                boxWidth: 15,
+                                padding: 20,
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = Math.round((value / total) * 100);
+                                    return view === 'percentage' 
+                                        ? `${label}: ${percentage}%` 
+                                        : `${label}: $${value}k`;
+                                }
+                            }
+                        }
+                    },
+                    animation: {
+                        animateScale: true,
+                        animateRotate: true
+                    }
+                }
+            });
+        }
+
+        // Initialize all charts when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            createBarChart();
+            createPieChart();
+            createScatterPlot();
+            
+            // Add event listeners for interactive controls
+            document.getElementById('bar-chart-metric').addEventListener('change', function() {
+                createBarChart(this.value);
+            });
+            
+            document.getElementById('pie-chart-view').addEventListener('change', function() {
+                createPieChart(this.value);
+            });
+            
+            document.getElementById('scatter-plot-dimension').addEventListener('change', function() {
+                createScatterPlot(this.value);
+            });
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            createBarChart(document.getElementById('bar-chart-metric').value);
+            createScatterPlot(document.getElementById('scatter-plot-dimension').value);
+            // Chart.js handles its own resizing
+        });
+    </script>
+</body>
+</html>
