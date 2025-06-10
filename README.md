@@ -58,3 +58,35 @@ This project aims to detect **fraudulent (spam)** emails using machine learning,
    ```bash
    git clone https://github.com/username/email-fraud-detection.git
    cd email-fraud-detection
+# Advanced Data Visualization Dashboard
+
+![Dashboard Screenshot](https://via.placeholder.com/800x500.png?text=Data+Visualization+Dashboard)
+
+An interactive dashboard featuring multiple data visualization charts built with D3.js and Chart.js, designed for responsive and insightful data analysis.
+
+## Features
+
+- **Interactive Bar Chart**: Visualize quarterly performance metrics with toggle between revenue and growth views
+- **Dynamic Pie Chart**: Display market distribution with percentage or absolute value options
+- **Customizable Scatter Plot**: Analyze customer data by age or income dimensions
+- **Responsive Design**: Adapts to different screen sizes for optimal viewing
+- **Interactive Elements**: 
+  - Hover tooltips for detailed data inspection
+  - Legend displays with color coding
+  - Dynamic metric selection
+
+## Technologies Used
+
+- **D3.js** (v7) - For custom bar charts and scatter plots
+- **Chart.js** - For interactive pie/doughnut charts
+- **Vanilla JavaScript** - For all interactivity and logic
+- **CSS3** - Modern styling with CSS variables and responsive grid
+- **HTML5** - Semantic structure
+
+## Installation
+
+No installation required - this is a client-side only application. Simply:
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/data-visualization-dashboard.git
